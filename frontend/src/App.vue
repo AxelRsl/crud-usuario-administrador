@@ -51,7 +51,7 @@ export default {
 body {
   font-family: 'Arial', sans-serif;
   line-height: 1.6;
-  background-color: #f4f4f4;
+  background-color: white;
   color: #333;
 }
 
@@ -103,5 +103,11 @@ main.container {
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Clase que se aplica a páginas con fondo completo */
+.full-bg {
+  background-color: white;
+  min-height: 100vh;
 }
 </style>
