@@ -1,0 +1,53 @@
+# Archivos y carpetas que no deben subirse a GitHub
+
+# Dependencias
+node_modules/
+*/node_modules/
+**/node_modules/
+
+# Archivos de entorno
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*/**.env
+
+# Archivos de log
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos subidos por usuarios
+/crud/backend/src/uploads/*
+!/crud/backend/src/uploads/bills/.gitkeep
+!/crud/backend/src/uploads/cv/.gitkeep
+!/crud/backend/src/uploads/photos/.gitkeep
+
+# Archivos de compilación y distribución
+/dist
+/build
+/coverage
+
+# Archivos específicos del sistema operativo
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Archivos de caché
+.cache/
+.parcel-cache/
+.npm/
+.eslintcache
+.yarn-integrity
+
+# Archivos de editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project

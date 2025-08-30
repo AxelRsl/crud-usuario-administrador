@@ -1,0 +1,24 @@
+{
+  "name": "crud",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "dev": "concurrently --kill-others --names \"BACKEND,FRONTEND\" --prefix-colors \"blue.bold,green.bold\" --prefix \"[{name}]\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "start:backend": "cd crud/backend && npm start",
+    "start:frontend": "cd crud/frontend && npm run serve",
+    "dev:backend": "cd crud/backend && npm run dev",
+    "dev:frontend": "cd crud/frontend && npm run serve",
+    "setup": "npm install && npm run setup:backend && npm run setup:frontend",
+    "setup:backend": "cd crud/backend && npm install",
+    "setup:frontend": "cd crud/frontend && npm install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Sistema de gestión de usuarios con roles de administrador y cliente",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
