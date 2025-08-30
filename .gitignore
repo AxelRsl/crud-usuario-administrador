@@ -21,10 +21,10 @@ yarn-debug.log*
 yarn-error.log*
 
 # Archivos subidos por usuarios
-/crud/backend/src/uploads/*
-!/crud/backend/src/uploads/bills/.gitkeep
-!/crud/backend/src/uploads/cv/.gitkeep
-!/crud/backend/src/uploads/photos/.gitkeep
+/backend/src/uploads/*
+!/backend/src/uploads/bills/.gitkeep
+!/backend/src/uploads/cv/.gitkeep
+!/backend/src/uploads/photos/.gitkeep
 
 # Archivos de compilación y distribución
 /dist

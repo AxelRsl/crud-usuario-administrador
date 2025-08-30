@@ -1,4 +1,4 @@
-# Documentación del Sistema de Gestión de Usuarios
+# Sistema de Gestión de Usuarios
 
 ## Descripción General
 
