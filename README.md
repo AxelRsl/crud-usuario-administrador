@@ -80,7 +80,7 @@ El modelo de usuario incluye la siguiente información:
 - **name**: Nombre del usuario (obligatorio)
 - **email**: Correo electrónico (obligatorio, único)
 - **password**: Contraseña encriptada (obligatorio)
-- **age**: Edad (obligatorio)
+- **age**: Edad (obligatorio, mínimo 18 años)
 - **city**: Ciudad (obligatorio)
 - **gender**: Sexo, opciones: 'masculino', 'femenino', 'otro' (obligatorio)
 - **role**: Rol, opciones: 'admin', 'cliente' (por defecto: 'cliente')
@@ -156,6 +156,34 @@ El sistema permite la carga de tres tipos de documentos con las siguientes restr
 
 ### Inicio del Proyecto
 
+#### Paso 1: Iniciar MongoDB
+**IMPORTANTE:** Antes de iniciar la aplicación, asegúrate de que el servidor de MongoDB esté en ejecución:
+
+- **Windows:**
+  - Para verificar si MongoDB está funcionando, abre una terminal y ejecuta:
+    ```
+    mongosh
+    ```
+  - Si conecta correctamente, verás la shell de MongoDB (mongosh). Esto confirma que el servidor está activo.
+  - Si no conecta, necesitas iniciar el servicio de MongoDB en Servicios de Windows (services.msc)
+  - Alternativamente, puedes iniciar el servidor manualmente con:
+    ```
+    mongod
+    ```
+
+- **macOS (con Homebrew):**
+  ```
+  brew services start mongodb-community
+  ```
+
+- **Linux:**
+  ```
+  sudo systemctl start mongod
+  ```
+
+Si MongoDB no está en ejecución, el backend no podrá conectarse a la base de datos y la aplicación no funcionará correctamente.
+
+#### Paso 2: Iniciar la aplicación
 Para iniciar tanto el backend como el frontend simultáneamente:
    ```
    npm run dev
