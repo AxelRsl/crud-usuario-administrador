@@ -7,7 +7,14 @@
           <h2 class="auth-title">Iniciar Sesión</h2>
         </div>
         
-        <div v-if="error" class="alert alert-danger">{{ error }}</div>
+        <div v-if="error" class="alert alert-danger">
+          <div v-if="Array.isArray(error)">
+            <ul>
+              <li v-for="(err, index) in error" :key="index">{{ err }}</li>
+            </ul>
+          </div>
+          <div v-else>{{ error }}</div>
+        </div>
         
         <form @submit.prevent="onSubmit" class="auth-form">
           <div class="form-group">

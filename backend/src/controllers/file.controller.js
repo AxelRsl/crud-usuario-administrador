@@ -65,7 +65,7 @@ exports.uploadPhoto = [
   async (req, res) => {
     try {
       if (!req.file) {
-        return res.status(400).json({ message: 'No se ha subido ninguna imagen' });
+        return res.status(400).json({ errores: ['No se ha subido ninguna imagen'] });
       }
 
       // Guardar la ruta en el usuario
@@ -85,11 +85,12 @@ exports.uploadPhoto = [
       await user.save();
 
       res.json({
-        message: 'Foto subida con éxito',
-        filePath: photoPath
+        success: true,
+        filePath: photoPath,
+        messages: ['Foto subida con éxito']
       });
     } catch (error) {
-      res.status(500).json({ message: 'Error al subir la foto', error: error.message });
+      res.status(500).json({ errores: ['Error al subir la foto: ' + error.message] });
     }
   }
 ];
@@ -100,7 +101,7 @@ exports.uploadCV = [
   async (req, res) => {
     try {
       if (!req.file) {
-        return res.status(400).json({ message: 'No se ha subido ningún CV' });
+        return res.status(400).json({ errores: ['No se ha subido ningún CV'] });
       }
 
       // Guardar la ruta en el usuario
@@ -120,11 +121,12 @@ exports.uploadCV = [
       await user.save();
 
       res.json({
-        message: 'CV subido con éxito',
-        filePath: cvPath
+        success: true,
+        filePath: cvPath,
+        messages: ['CV subido con éxito']
       });
     } catch (error) {
-      res.status(500).json({ message: 'Error al subir el CV', error: error.message });
+      res.status(500).json({ errores: ['Error al subir el CV: ' + error.message] });
     }
   }
 ];
@@ -135,7 +137,7 @@ exports.uploadBill = [
   async (req, res) => {
     try {
       if (!req.file) {
-        return res.status(400).json({ message: 'No se ha subido ningún recibo' });
+        return res.status(400).json({ errores: ['No se ha subido ningún recibo'] });
       }
 
       // Guardar la ruta en el usuario
@@ -155,11 +157,12 @@ exports.uploadBill = [
       await user.save();
 
       res.json({
-        message: 'Recibo subido con éxito',
-        filePath: billPath
+        success: true,
+        filePath: billPath,
+        messages: ['Recibo subido con éxito']
       });
     } catch (error) {
-      res.status(500).json({ message: 'Error al subir el recibo', error: error.message });
+      res.status(500).json({ errores: ['Error al subir el recibo: ' + error.message] });
     }
   }
 ];

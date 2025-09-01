@@ -69,7 +69,12 @@ export default createStore({
             resolve(resp);
           })
           .catch(err => {
-            commit('AUTH_ERROR', err.response?.data?.message || 'Error de registro');
+            // Manejar errores (formato estándar errores[])
+            if (err.response?.data?.errores) {
+              commit('AUTH_ERROR', err.response.data.errores);
+            } else {
+              commit('AUTH_ERROR', ['Error de registro']);
+            }
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             reject(err);
@@ -91,7 +96,12 @@ export default createStore({
             resolve(resp);
           })
           .catch(err => {
-            commit('AUTH_ERROR', err.response?.data?.message || 'Error de inicio de sesión');
+            // Manejar errores (formato estándar errores[])
+            if (err.response?.data?.errores) {
+              commit('AUTH_ERROR', err.response.data.errores);
+            } else {
+              commit('AUTH_ERROR', ['Error de inicio de sesión']);
+            }
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             reject(err);
@@ -123,7 +133,12 @@ export default createStore({
             resolve(resp);
           })
           .catch(err => {
-            commit('AUTH_ERROR', err.response?.data?.message || 'Error al actualizar usuario');
+            // Manejar errores (formato estándar errores[])
+            if (err.response?.data?.errores) {
+              commit('AUTH_ERROR', err.response.data.errores);
+            } else {
+              commit('AUTH_ERROR', ['Error al actualizar usuario']);
+            }
             reject(err);
           });
       });
@@ -149,7 +164,12 @@ export default createStore({
             resolve(resp);
           })
           .catch(err => {
-            commit('AUTH_ERROR', err.response?.data?.message || `Error al subir ${fileType}`);
+            // Manejar errores (formato estándar errores[])
+            if (err.response?.data?.errores) {
+              commit('AUTH_ERROR', err.response.data.errores);
+            } else {
+              commit('AUTH_ERROR', [`Error al subir ${fileType}`]);
+            }
             reject(err);
           });
       });
@@ -160,10 +180,15 @@ export default createStore({
       return new Promise((resolve, reject) => {
         axios.get(`${API_URL}/users`)
           .then(resp => {
-            resolve(resp.data);
+            resolve(resp.data.users);
           })
           .catch(err => {
-            commit('AUTH_ERROR', err.response?.data?.message || 'Error al cargar usuarios');
+            // Manejar errores (formato estándar errores[])
+            if (err.response?.data?.errores) {
+              commit('AUTH_ERROR', err.response.data.errores);
+            } else {
+              commit('AUTH_ERROR', ['Error al cargar usuarios']);
+            }
             reject(err);
           });
       });
@@ -172,6 +197,25 @@ export default createStore({
     // Limpiar errores
     clearError({ commit }) {
       commit('CLEAR_ERROR');
+    },
+    
+    // Eliminar usuario
+    deleteUser({ commit }, userId) {
+      return new Promise((resolve, reject) => {
+        axios.delete(`${API_URL}/users/${userId}`)
+          .then(resp => {
+            resolve(resp.data);
+          })
+          .catch(err => {
+            // Manejar errores (formato estándar errores[])
+            if (err.response?.data?.errores) {
+              commit('AUTH_ERROR', err.response.data.errores);
+            } else {
+              commit('AUTH_ERROR', ['Error al eliminar usuario']);
+            }
+            reject(err);
+          });
+      });
     }
   },
   modules: {}

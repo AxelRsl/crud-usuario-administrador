@@ -15,7 +15,12 @@
           </div>
 
           <div v-if="error" class="alert alert-danger">
-            {{ error }}
+            <div v-if="Array.isArray(error)">
+              <ul>
+                <li v-for="(err, index) in error" :key="index">{{ err }}</li>
+              </ul>
+            </div>
+            <div v-else>{{ error }}</div>
           </div>
 
           <form @submit.prevent="updateProfile">

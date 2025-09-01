@@ -7,7 +7,14 @@
           <h2 class="auth-title">Registro de Usuario</h2>
         </div>
         
-        <div v-if="error" class="alert alert-danger">{{ error }}</div>
+        <div v-if="error" class="alert alert-danger">
+          <div v-if="Array.isArray(error)">
+            <ul>
+              <li v-for="(err, index) in error" :key="index">{{ err }}</li>
+            </ul>
+          </div>
+          <div v-else>{{ error }}</div>
+        </div>
         
         <form @submit.prevent="onSubmit" class="auth-form">
           <div class="form-group">
@@ -42,8 +49,12 @@
               v-model="user.password"
               class="form-control"
               required
+              minlength="8"
               placeholder="Cree una contraseña segura"
             >
+            <small class="form-text text-muted">
+              La contraseña debe tener al menos 8 caracteres
+            </small>
           </div>
           
           <div class="form-row">
@@ -276,5 +287,11 @@ export default {
   color: #721c24;
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
+}
+
+.form-text {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-top: 4px;
 }
 </style>

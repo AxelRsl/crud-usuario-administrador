@@ -6,9 +6,13 @@ const path = require('path');
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find({}).select('-password');
-    res.json(users);
+    res.json({
+      success: true,
+      users,
+      messages: ['Usuarios obtenidos con éxito']
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener usuarios', error: error.message });
+    res.status(500).json({ errores: ['Error al obtener usuarios: ' + error.message] });
   }
 };
 
@@ -18,17 +22,21 @@ exports.getUserById = async (req, res) => {
     const user = await User.findById(req.params.id).select('-password');
 
     if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+      return res.status(404).json({ errores: ['Usuario no encontrado'] });
     }
 
     // Solo el propio usuario o un admin puede ver los detalles
     if (req.userRole !== 'admin' && req.userId.toString() !== user._id.toString()) {
-      return res.status(403).json({ message: 'No autorizado para ver este perfil' });
+      return res.status(403).json({ errores: ['No autorizado para ver este perfil'] });
     }
 
-    res.json(user);
+    res.json({
+      success: true,
+      user,
+      messages: ['Usuario obtenido con éxito']
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener usuario', error: error.message });
+    res.status(500).json({ errores: ['Error al obtener usuario: ' + error.message] });
   }
 };
 
@@ -43,12 +51,12 @@ exports.updateUser = async (req, res) => {
     // Verificar si el usuario existe
     const user = await User.findById(req.params.id);
     if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+      return res.status(404).json({ errores: ['Usuario no encontrado'] });
     }
 
     // Verificar autorización (solo el propio usuario o un admin pueden actualizar)
     if (req.userRole !== 'admin' && req.userId.toString() !== user._id.toString()) {
-      return res.status(403).json({ message: 'No autorizado para actualizar este perfil' });
+      return res.status(403).json({ errores: ['No autorizado para actualizar este perfil'] });
     }
 
     // Actualizar usuario
@@ -59,11 +67,12 @@ exports.updateUser = async (req, res) => {
     ).select('-password');
 
     res.json({
-      message: 'Usuario actualizado con éxito',
-      user: updatedUser
+      success: true,
+      user: updatedUser,
+      messages: ['Usuario actualizado con éxito']
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar usuario', error: error.message });
+    res.status(500).json({ errores: ['Error al actualizar usuario: ' + error.message] });
   }
 };
 
@@ -73,12 +82,12 @@ exports.deleteUser = async (req, res) => {
     // Verificar si el usuario existe
     const user = await User.findById(req.params.id);
     if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+      return res.status(404).json({ errores: ['Usuario no encontrado'] });
     }
 
     // Solo un admin o el propio usuario pueden eliminar
     if (req.userRole !== 'admin' && req.userId.toString() !== user._id.toString()) {
-      return res.status(403).json({ message: 'No autorizado para eliminar este usuario' });
+      return res.status(403).json({ errores: ['No autorizado para eliminar este usuario'] });
     }
 
     // Eliminar los archivos asociados si existen
@@ -106,9 +115,12 @@ exports.deleteUser = async (req, res) => {
     // Eliminar usuario
     await User.findByIdAndDelete(req.params.id);
 
-    res.json({ message: 'Usuario eliminado con éxito' });
+    res.json({ 
+      success: true,
+      messages: ['Usuario eliminado con éxito'] 
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error al eliminar usuario', error: error.message });
+    res.status(500).json({ errores: ['Error al eliminar usuario: ' + error.message] });
   }
 };
 
@@ -117,8 +129,12 @@ exports.getCurrentUser = async (req, res) => {
   try {
     // El middleware de autenticación ya adjuntó el usuario a la solicitud
     const user = await User.findById(req.userId).select('-password');
-    res.json(user);
+    res.json({
+      success: true,
+      user,
+      messages: ['Perfil obtenido con éxito']
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener perfil', error: error.message });
+    res.status(500).json({ errores: ['Error al obtener perfil: ' + error.message] });
   }
 };
