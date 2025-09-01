@@ -78,9 +78,9 @@ frontend/
 El modelo de usuario incluye la siguiente información:
 
 - **name**: Nombre del usuario (obligatorio)
-- **email**: Correo electrónico (obligatorio, único, formato validado)
-- **password**: Contraseña encriptada (obligatorio, mínimo 8 caracteres)
-- **age**: Edad (obligatorio, mínimo 18 años)
+- **email**: Correo electrónico (obligatorio, único, debe contener '@')
+- **password**: Contraseña (obligatorio, mínimo 8 caracteres)
+- **age**: Edad (obligatorio, valor numérico)
 - **city**: Ciudad (obligatorio)
 - **gender**: Sexo, opciones: 'masculino', 'femenino', 'otro' (obligatorio)
 - **role**: Rol, opciones: 'admin', 'cliente' (por defecto: 'cliente')

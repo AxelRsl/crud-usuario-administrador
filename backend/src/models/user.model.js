@@ -20,8 +20,7 @@ const UserSchema = new mongoose.Schema({
   },
   age: {
     type: Number,
-    required: true,
-    min: [18, 'La edad debe ser igual o mayor a 18 años']
+    required: true
   },
   city: {
     type: String,
