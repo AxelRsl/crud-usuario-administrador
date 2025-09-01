@@ -5,16 +5,15 @@
     <div class="card">
       <div class="card-header">
         <h2 class="card-title">Gestión de Usuarios</h2>
+        <div class="filter-options">
+          <label class="filter-toggle">
+            <input type="checkbox" v-model="showOnly18Plus">
+            <span class="filter-label">Mostrar solo usuarios de 18 años o más</span>
+          </label>
+        </div>
       </div>
       
-      <div v-if="error" class="alert alert-danger">
-        <div v-if="Array.isArray(error)">
-          <ul>
-            <li v-for="(err, index) in error" :key="index">{{ err }}</li>
-          </ul>
-        </div>
-        <div v-else>{{ error }}</div>
-      </div>
+      <ErrorDisplay :error="error" />
 
       <div v-if="loading" class="text-center loading">
         Cargando usuarios...
@@ -109,8 +108,13 @@
 </template>
 
 <script>
+import ErrorDisplay from '../components/ErrorDisplay.vue';
+
 export default {
   name: 'AdminPanel',
+  components: {
+    ErrorDisplay
+  },
   data() {
     return {
       users: [],
@@ -119,90 +123,86 @@ export default {
       userToDelete: null,
       deleting: false,
       sortKey: '', // Campo por el que se ordena
-      sortOrder: 1  // 1 para ascendente, -1 para descendente
+      sortOrder: 1,  // 1 para ascendente, -1 para descendente
+      showOnly18Plus: true // Por defecto, mostrar solo usuarios de 18+ años
     };
   },
   computed: {
     error() {
       return this.$store.getters.error;
     },
+    // Usuarios filtrados (por edad si es necesario)
+    filteredUsers() {
+      return this.showOnly18Plus 
+        ? this.users.filter(user => Number(user.age) >= 18)
+        : this.users;
+    },
+    
+    // Usuarios ordenados según el criterio seleccionado
     sortedUsers() {
-      // Si no hay clave de ordenamiento, devuelve los usuarios sin cambios
-      if (!this.sortKey) return this.users;
+      // Sin ordenamiento, devolver solo los filtrados
+      if (!this.sortKey) return this.filteredUsers;
       
-      // Crea una copia del array para no modificar el original
-      const usersArray = [...this.users];
-      
-      // Ordena según la clave y el orden
-      return usersArray.sort((a, b) => {
-        let valueA = a[this.sortKey];
-        let valueB = b[this.sortKey];
+      return [...this.filteredUsers].sort((a, b) => {
+        // Extraer y normalizar los valores a comparar
+        const isNumeric = this.sortKey === 'age';
+        const valueA = isNumeric ? Number(a[this.sortKey] || 0) : String(a[this.sortKey] || '').toLowerCase();
+        const valueB = isNumeric ? Number(b[this.sortKey] || 0) : String(b[this.sortKey] || '').toLowerCase();
         
-        // Convierte a número si es la edad
-        if (this.sortKey === 'age') {
-          valueA = Number(valueA || 0);
-          valueB = Number(valueB || 0);
-        } 
-        // Para campos de texto, asegúrate de que sean strings y no sean null/undefined
-        else {
-          valueA = String(valueA || '').toLowerCase();
-          valueB = String(valueB || '').toLowerCase();
-        }
-        
-        if (valueA < valueB) return -1 * this.sortOrder;
-        if (valueA > valueB) return 1 * this.sortOrder;
-        return 0;
+        // Comparar según el orden seleccionado
+        return valueA === valueB ? 0 : (valueA < valueB ? -1 : 1) * this.sortOrder;
       });
     }
   },
   methods: {
     // Método para ordenar por una columna
     sortBy(key) {
-      // Si ya estamos ordenando por esta columna, cambiamos el orden
-      if (this.sortKey === key) {
-        this.sortOrder = -this.sortOrder;
-      } else {
-        // Si es una nueva columna, establecemos orden ascendente
-        this.sortKey = key;
-        this.sortOrder = 1;
-      }
+      this.sortOrder = this.sortKey === key ? -this.sortOrder : 1;
+      this.sortKey = key;
     },
     
-    loadUsers() {
+    // Cargar lista de usuarios
+    async loadUsers() {
       this.loading = true;
-      this.$store.dispatch('clearError'); // Limpia errores previos
-      this.$store.dispatch('loadUsers')
-        .then(users => {
-          this.users = users;
-          this.loading = false;
-        })
-        .catch(() => {
-          // El store ya maneja los errores y los muestra
-          this.loading = false;
-        });
+      this.$store.dispatch('clearError');
+      
+      try {
+        this.users = await this.$store.dispatch('loadUsers');
+      } catch (error) {
+        // Los errores ya se manejan en el store
+      } finally {
+        this.loading = false;
+      }
     },
+    // Abrir modal de confirmación de eliminación
     confirmDelete(user) {
       this.userToDelete = user;
       this.showDeleteModal = true;
     },
+    
+    // Cancelar proceso de eliminación
     cancelDelete() {
       this.userToDelete = null;
       this.showDeleteModal = false;
     },
-    deleteUser() {
+    
+    // Eliminar usuario
+    async deleteUser() {
+      if (!this.userToDelete) return;
+      
       this.deleting = true;
-
-      this.$store.dispatch('deleteUser', this.userToDelete._id)
-        .then(() => {
-          this.users = this.users.filter(user => user._id !== this.userToDelete._id);
-          this.showDeleteModal = false;
-          this.userToDelete = null;
-          this.deleting = false;
-        })
-        .catch(() => {
-          this.deleting = false;
-          // Mantener el modal abierto en caso de error
-        });
+      
+      try {
+        await this.$store.dispatch('deleteUser', this.userToDelete._id);
+        // Eliminar usuario de la lista local
+        this.users = this.users.filter(user => user._id !== this.userToDelete._id);
+        this.showDeleteModal = false;
+        this.userToDelete = null;
+      } catch (error) {
+        // Modal permanece abierto en caso de error
+      } finally {
+        this.deleting = false;
+      }
     }
   },
   created() {
@@ -213,20 +213,33 @@ export default {
 </script>
 
 <style scoped>
+/* Estilos de diseño y generales */
 .admin-panel h1 {
   margin-bottom: 2rem;
-}
-
-.loading {
-  padding: 2rem;
-  font-style: italic;
-  color: #7f8c8d;
 }
 
 .text-center {
   text-align: center;
 }
 
+.loading, .empty-state {
+  padding: 2rem;
+  font-style: italic;
+  color: #7f8c8d;
+  text-align: center;
+}
+
+/* Estilos de tarjetas y encabezados */
+.card-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  margin-bottom: 10px;
+}
+
+/* Estilos de insignias */
 .badge {
   display: inline-block;
   padding: 0.25rem 0.5rem;
@@ -244,6 +257,13 @@ export default {
   background-color: #3498db;
 }
 
+/* Estilos de botones */
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+/* Estilos de documentos */
 .document-icons {
   display: flex;
   gap: 0.5rem;
@@ -253,19 +273,7 @@ export default {
   font-size: 1.2rem;
 }
 
-.empty-state {
-  padding: 2rem;
-  text-align: center;
-  color: #7f8c8d;
-  font-style: italic;
-}
-
-.btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8rem;
-}
-
-/* Modal styles */
+/* Estilos de modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -298,12 +306,12 @@ export default {
   margin-top: 2rem;
 }
 
-/* Estilos para los encabezados ordenables */
+/* Estilos para encabezados de tabla ordenables */
 .sortable {
   cursor: pointer;
   user-select: none;
   position: relative;
-  padding-right: 22px; /* Espacio para el icono */
+  padding-right: 22px;
   transition: background-color 0.2s;
 }
 
@@ -317,10 +325,9 @@ export default {
   top: 50%;
   transform: translateY(-50%);
   font-size: 1.2em;
-  color: #03a9f4; /* Color azul para resaltar */
+  color: #03a9f4;
 }
 
-/* Añadir indicador visual para columnas ordenables incluso sin hover */
 .sortable::after {
   content: '⇅';
   opacity: 0.3;
@@ -331,17 +338,11 @@ export default {
   font-size: 0.8em;
 }
 
-/* Ocultar el indicador cuando está en hover */
-.sortable:hover::after {
-  opacity: 0;
-}
-
-/* Clase específica para ocultar el indicador cuando se está ordenando */
+.sortable:hover::after,
 th.sortable.active-sort::after {
   opacity: 0;
 }
 
-/* Estilos adicionales para mejorar la apariencia de columnas ordenables */
 th.sortable {
   background-color: rgba(3, 169, 244, 0.03);
   border-bottom: 2px solid rgba(3, 169, 244, 0.2);
@@ -352,17 +353,22 @@ th.active-sort {
   border-bottom: 2px solid rgba(3, 169, 244, 0.7);
 }
 
-/* Estilos para alertas de error */
-.alert {
-  padding: 12px 15px;
-  margin-bottom: 20px;
-  border-radius: 6px;
+/* Estilos de filtros */
+.filter-options {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
 }
 
-.alert-danger {
-  color: #721c24;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.filter-label {
+  margin-left: 8px;
+  font-size: 0.9em;
 }
 </style>
 

@@ -7,14 +7,7 @@
           <h2 class="auth-title">Registro de Usuario</h2>
         </div>
         
-        <div v-if="error" class="alert alert-danger">
-          <div v-if="Array.isArray(error)">
-            <ul>
-              <li v-for="(err, index) in error" :key="index">{{ err }}</li>
-            </ul>
-          </div>
-          <div v-else>{{ error }}</div>
-        </div>
+        <ErrorDisplay :error="error" />
         
         <form @submit.prevent="onSubmit" class="auth-form">
           <div class="form-group">
@@ -66,7 +59,6 @@
                 v-model="user.age"
                 class="form-control"
                 required
-                min="18"
                 placeholder="Edad"
               >
             </div>
@@ -119,8 +111,13 @@
 </template>
 
 <script>
+import ErrorDisplay from '../components/ErrorDisplay.vue';
+
 export default {
   name: 'Register',
+  components: {
+    ErrorDisplay
+  },
   data() {
     return {
       user: {
@@ -160,6 +157,7 @@ export default {
 </script>
 
 <style scoped>
+/* Estilos específicos de la página de registro */
 .auth-page {
   display: flex;
   justify-content: center;
@@ -204,65 +202,13 @@ export default {
   margin-bottom: 20px;
 }
 
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-row {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 0;
-}
-
-.form-group.half {
-  flex: 1;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: #444;
-}
-
-.form-control {
-  width: 100%;
-  padding: 12px 15px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.form-control:focus {
-  border-color: #03a9f4;
-  box-shadow: 0 0 0 3px rgba(3, 169, 244, 0.2);
-  outline: none;
-}
-
+/* Botón específico del formulario de autenticación */
 .btn-primary {
   width: 100%;
-  padding: 12px;
-  background-color: #03a9f4;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
-  transition: background-color 0.3s;
   margin-top: 10px;
 }
 
-.btn-primary:hover {
-  background-color: #0288d1;
-}
-
-.btn-primary:disabled {
-  background-color: #b0bec5;
-  cursor: not-allowed;
-}
-
+/* Estilos del pie de página de autenticación */
 .auth-footer {
   margin-top: 24px;
   text-align: center;
@@ -280,15 +226,7 @@ export default {
   text-decoration: underline;
 }
 
-.alert {
-  padding: 12px 15px;
-  margin-bottom: 20px;
-  border-radius: 6px;
-  color: #721c24;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-}
-
+/* Texto de ayuda en formularios */
 .form-text {
   font-size: 0.85rem;
   color: #6c757d;

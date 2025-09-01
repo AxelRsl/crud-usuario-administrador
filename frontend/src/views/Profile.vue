@@ -10,18 +10,9 @@
             <h2 class="card-title">Información Personal</h2>
           </div>
 
-          <div v-if="updateSuccess" class="alert alert-success">
-            Información actualizada correctamente
-          </div>
-
-          <div v-if="error" class="alert alert-danger">
-            <div v-if="Array.isArray(error)">
-              <ul>
-                <li v-for="(err, index) in error" :key="index">{{ err }}</li>
-              </ul>
-            </div>
-            <div v-else>{{ error }}</div>
-          </div>
+          <SuccessMessage v-if="updateSuccess" message="Información actualizada correctamente" />
+          
+          <ErrorDisplay :error="error" />
 
           <form @submit.prevent="updateProfile">
             <div class="form-group">
@@ -55,7 +46,6 @@
                 v-model="userData.age"
                 class="form-control"
                 required
-                min="18"
               >
             </div>
 
@@ -95,76 +85,56 @@
 
           <div class="document-section">
             <h3>Fotografía</h3>
-            <div v-if="user.photo" class="current-document">
-              <img :src="`http://localhost:5000/${user.photo}`" alt="Foto de perfil" class="preview-image">
-              <p>Foto actual</p>
-            </div>
-            <div class="upload-form">
-              <input type="file" id="photo" @change="handleFileSelect('photo', $event)" accept="image/*" class="file-input">
-              <label for="photo" class="file-label">Seleccionar nueva foto</label>
-              <div class="file-restrictions">
-                <small>Formatos permitidos: JPG, PNG, GIF, etc. (cualquier imagen)</small>
-                <small>Tamaño máximo: 5MB</small>
-              </div>
-              <button
-                v-if="selectedFiles.photo"
-                @click="uploadFile('photo')"
-                class="btn btn-success"
-                :disabled="uploading.photo"
-              >
-                {{ uploading.photo ? 'Subiendo...' : 'Subir Foto' }}
-              </button>
-            </div>
+            <FileUpload
+              id="photo"
+              label="Foto"
+              labelAction="nueva foto"
+              documentLabel="foto"
+              :currentFile="user.photo"
+              accept="image/*"
+              allowedFormats="Formatos permitidos: JPG, PNG, GIF, etc. (cualquier imagen)"
+              maxSize="5MB"
+              :uploading="uploading.photo"
+              fileType="photo"
+              @file-selected="handleFileSelectedComponent"
+              @upload="uploadFileComponent"
+            />
           </div>
 
           <div class="document-section">
             <h3>Currículum Vitae</h3>
-            <div v-if="user.cv" class="current-document">
-              <a :href="`http://localhost:5000/${user.cv}`" target="_blank" class="document-link">
-                <i class="document-icon">📄</i> Ver CV actual
-              </a>
-            </div>
-            <div class="upload-form">
-              <input type="file" id="cv" @change="handleFileSelect('cv', $event)" accept=".pdf,.doc,.docx" class="file-input">
-              <label for="cv" class="file-label">Seleccionar nuevo CV</label>
-              <div class="file-restrictions">
-                <small>Formatos permitidos: PDF, DOC, DOCX</small>
-                <small>Tamaño máximo: 5MB</small>
-              </div>
-              <button
-                v-if="selectedFiles.cv"
-                @click="uploadFile('cv')"
-                class="btn btn-success"
-                :disabled="uploading.cv"
-              >
-                {{ uploading.cv ? 'Subiendo...' : 'Subir CV' }}
-              </button>
-            </div>
+            <FileUpload
+              id="cv"
+              label="CV"
+              labelAction="nuevo CV"
+              documentLabel="CV"
+              :currentFile="user.cv"
+              accept=".pdf,.doc,.docx"
+              allowedFormats="Formatos permitidos: PDF, DOC, DOCX"
+              maxSize="5MB"
+              :uploading="uploading.cv"
+              fileType="cv"
+              @file-selected="handleFileSelectedComponent"
+              @upload="uploadFileComponent"
+            />
           </div>
 
           <div class="document-section">
             <h3>Recibo de Teléfono/Luz</h3>
-            <div v-if="user.bill" class="current-document">
-              <a :href="`http://localhost:5000/${user.bill}`" target="_blank" class="document-link">
-                <i class="document-icon">📄</i> Ver recibo actual
-              </a>
-            </div>
-            <div class="upload-form">
-              <input type="file" id="bill" @change="handleFileSelect('bill', $event)" accept=".pdf,image/*" class="file-input">
-              <label for="bill" class="file-label">Seleccionar nuevo recibo</label>
-              <div class="file-restrictions">
-                <small>Formatos permitidos: PDF, JPG, PNG, etc.</small>
-                <small>Tamaño máximo: 5MB</small>
-              </div>
-              <button
-                v-if="selectedFiles.bill"
-                @click="uploadFile('bill')"
-                class="btn btn-success"
-                :disabled="uploading.bill"
-              >
-                {{ uploading.bill ? 'Subiendo...' : 'Subir Recibo' }}
-              </button>
-            </div>
+            <FileUpload
+              id="bill"
+              label="Recibo"
+              labelAction="nuevo recibo"
+              documentLabel="recibo"
+              :currentFile="user.bill"
+              accept=".pdf,image/*"
+              allowedFormats="Formatos permitidos: PDF, JPG, PNG, etc."
+              maxSize="5MB"
+              :uploading="uploading.bill"
+              fileType="bill"
+              @file-selected="handleFileSelectedComponent"
+              @upload="uploadFileComponent"
+            />
           </div>
         </div>
       </div>
@@ -178,8 +148,17 @@
 </template>
 
 <script>
+import ErrorDisplay from '../components/ErrorDisplay.vue';
+import SuccessMessage from '../components/SuccessMessage.vue';
+import FileUpload from '../components/FileUpload.vue';
+
 export default {
   name: 'Profile',
+  components: {
+    ErrorDisplay,
+    SuccessMessage,
+    FileUpload
+  },
   data() {
     return {
       userData: {
@@ -257,12 +236,22 @@ export default {
       });
     },
 
-    // Manejar selección de archivo
+    // Manejar selección de archivo (método antiguo, mantenido para compatibilidad)
     handleFileSelect(fileType, event) {
       const file = event.target.files[0];
       if (file) {
         this.selectedFiles[fileType] = file;
       }
+    },
+
+    // Método nuevo para manejar la selección de archivos desde el componente
+    handleFileSelectedComponent({ fileType, file }) {
+      this.selectedFiles[fileType] = file;
+    },
+
+    // Método nuevo para subir archivos desde el componente
+    uploadFileComponent({ fileType }) {
+      this.uploadFile(fileType);
     },
 
     // Subir archivo al servidor
@@ -304,6 +293,7 @@ export default {
   margin-bottom: 2rem;
 }
 
+/* Estilos para secciones de documentos */
 .document-section {
   padding: 1.5rem;
   border-bottom: 1px solid #eee;
@@ -318,63 +308,7 @@ export default {
   color: #2c3e50;
 }
 
-.current-document {
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background: #f9f9f9;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.preview-image {
-  max-width: 100%;
-  max-height: 200px;
-  border-radius: 4px;
-}
-
-.document-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #3498db;
-  text-decoration: none;
-}
-
-.document-icon {
-  margin-right: 0.5rem;
-  font-size: 1.5rem;
-}
-
-.upload-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.file-input {
-  display: none;
-}
-
-.file-label {
-  display: inline-block;
-  padding: 0.75rem 1rem;
-  background: #f1f1f1;
-  color: #333;
-  border-radius: 4px;
-  cursor: pointer;
-  text-align: center;
-}
-
-.file-label:hover {
-  background: #e1e1e1;
-}
-
-.file-restrictions {
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-  color: #7f8c8d;
-}
-
+/* Estilos adicionales */
 small {
   color: #7f8c8d;
   font-size: 0.8rem;
@@ -388,10 +322,5 @@ small {
 .no-user-message p {
   margin-bottom: 1rem;
   font-size: 1.2rem;
-}
-
-.no-user-message .btn {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
 }
 </style>
